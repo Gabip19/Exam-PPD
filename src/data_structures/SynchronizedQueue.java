@@ -1,17 +1,15 @@
 package data_structures;
 
-import domain.ParticipantEntry;
-
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SynchronizedQueue {
-    private final Queue<ParticipantEntry> queue = new LinkedList<>();
+public class SynchronizedQueue<TEntry> {
+    private final Queue<TEntry> queue = new LinkedList<>();
     private int activeConsumers = 0;
-    private boolean producersAreRunning = false;
+    private int activeProducers = 0;
     private int size = 0;
     private final int maxSize;
     private final Object locker = new Object();
@@ -24,7 +22,7 @@ public class SynchronizedQueue {
         this.maxSize = maxSize;
     }
 
-    public void enqueue(ParticipantEntry element) {
+    public void enqueue(TEntry element) {
         lock.lock();
         try {
             while (size == maxSize && activeConsumers != 0) {
@@ -45,12 +43,12 @@ public class SynchronizedQueue {
         }
     }
 
-    public ParticipantEntry dequeue() throws InterruptedException {
+    public TEntry dequeue() throws InterruptedException {
         lock.lock();
         try {
-            while (queue.isEmpty() && producersAreRunning) {
+            while (queue.isEmpty() && activeProducers != 0) {
                 notEmpty.await();
-                if (queue.isEmpty() && !producersAreRunning) {
+                if (queue.isEmpty() && activeProducers == 0) {
                     return null;
                 }
             }
@@ -65,16 +63,18 @@ public class SynchronizedQueue {
         }
     }
 
-    public void startProducers() {
+    public void startProducer() {
         lock.lock();
-        producersAreRunning = true;
+        activeProducers++;
         lock.unlock();
     }
 
-    public void stopProducers() {
+    public void stopProducer() {
         lock.lock();
-        producersAreRunning = false;
-        notEmpty.signalAll();
+        activeProducers--;
+        if (activeProducers == 0) {
+            notEmpty.signalAll();
+        }
         lock.unlock();
     }
 
@@ -93,5 +93,13 @@ public class SynchronizedQueue {
             }
         }
         lock.unlock();
+    }
+
+    public void awaitTermination() throws InterruptedException {
+        synchronized (locker) {
+            if (activeConsumers != 0 && activeProducers != 0) {
+                locker.wait();
+            }
+        }
     }
 }

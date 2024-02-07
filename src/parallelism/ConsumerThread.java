@@ -1,13 +1,14 @@
 package parallelism;
 
+import data_structures.SynchronizedList;
 import data_structures.SynchronizedQueue;
-import data_structures.ranking_list.RankingList;
+import domain.ParticipantEntry;
 
-public class ProcessingThread extends Thread {
-    private final SynchronizedQueue queue;
-    private final RankingList resultList;
+public class ConsumerThread extends Thread {
+    private final SynchronizedQueue<ParticipantEntry> queue;
+    private final SynchronizedList<ParticipantEntry> resultList;
 
-    public ProcessingThread(SynchronizedQueue queue, RankingList resultList) {
+    public ConsumerThread(SynchronizedQueue<ParticipantEntry> queue, SynchronizedList<ParticipantEntry> resultList) {
         this.queue = queue;
         this.resultList = resultList;
     }
@@ -24,7 +25,7 @@ public class ProcessingThread extends Thread {
                     break;
                 }
 
-                resultList.processParticipantEntry(entry);
+                resultList.add(entry);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

@@ -1,32 +1,34 @@
 package data_structures;
 
-import domain.ParticipantEntry;
-
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class MyLinkedList {
+public class MyLinkedList<TEntry> {
 
-    public static class Node {
-
-        private final ParticipantEntry entry;
+    public class Node {
+        private TEntry entry;
         private Node next;
         private Node previous;
         private final Lock lock = new ReentrantLock();
-        public Node(ParticipantEntry entry) {
+
+        public Node(TEntry entry) {
             this.entry = entry;
             this.next = null;
             this.previous = null;
         }
 
-        public Node(ParticipantEntry entry, Node next, Node previous) {
+        public Node(TEntry entry, Node next, Node previous) {
             this.entry = entry;
             this.next = next;
             this.previous = previous;
         }
 
-        public ParticipantEntry getEntry() {
+        public TEntry getEntry() {
             return entry;
+        }
+
+        public void setEntry(TEntry entry) {
+            this.entry = entry;
         }
 
         public Node getNext() {
@@ -40,7 +42,6 @@ public class MyLinkedList {
         public Lock getLock() {
             return lock;
         }
-
     }
 
     public MyLinkedList() {
@@ -49,10 +50,12 @@ public class MyLinkedList {
 
         head.next = tail;
         tail.previous = head;
+        size = 0;
     }
 
     private final Node head;
     private final Node tail;
+    private int size;
 
     public Node getHead() {
         return head;
@@ -60,8 +63,18 @@ public class MyLinkedList {
     public Node getTail() {
         return tail;
     }
+    public int getSize() {
+        return size;
+    }
 
-    public void insertAfterNode(Node node, ParticipantEntry value) {
+    public Node getFirstNode() {
+        if (size == 0) {
+            return null;
+        }
+        return head.next;
+    }
+
+    public void insertAfterNode(Node node, TEntry value) {
         var nextNode = node.next;
         var newNode = new Node(value);
 
@@ -70,9 +83,11 @@ public class MyLinkedList {
 
         newNode.next = nextNode;
         nextNode.previous = newNode;
+
+        size++;
     }
 
-    public void insertBeforeNode(Node node, ParticipantEntry value) {
+    public void insertBeforeNode(Node node, TEntry value) {
         var previousNode = node.previous;
         var newNode = new Node(value);
 
@@ -81,16 +96,53 @@ public class MyLinkedList {
 
         newNode.previous = previousNode;
         previousNode.next = newNode;
+
+        size++;
     }
 
     public void removeNode(Node node) {
         node.previous.next = node.next;
         node.next.previous = node.previous;
+
+        size--;
     }
 
-    public void updateNode(Node node, ParticipantEntry entry) {
-        var nodeEntry = node.getEntry();
-        var newScore = nodeEntry.getScore() + entry.getScore();
-        nodeEntry.setScore(newScore);
+    public void removeNode(TEntry entry) {
+        var currentNode = getFirstNode();
+        while (currentNode != tail && !currentNode.getEntry().equals(entry)) {
+            currentNode = currentNode.next;
+        }
+
+        if (currentNode == tail) {
+            return;
+        }
+
+        removeNode(currentNode);
+    }
+
+    public void updateNode(Node node, TEntry entry) {
+        node.setEntry(entry);
+    }
+
+    public void insertLast(TEntry entry) {
+        var newNode = new Node(entry);
+        var prev = tail.previous;
+
+        prev.next = newNode;
+        newNode.previous = prev;
+
+        tail.previous = newNode;
+        newNode.next = tail;
+    }
+
+    public void insertFirst(TEntry entry) {
+        var newNode = new Node(entry);
+        var next = head.next;
+
+        head.next = newNode;
+        newNode.previous = head;
+
+        next.previous = newNode;
+        newNode.next = next;
     }
 }
