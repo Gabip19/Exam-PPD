@@ -1,12 +1,12 @@
 package parallelism;
 
 import data_structures.SynchronizedQueue;
-import domain.ParticipantEntry;
+import domain.Entry;
 
 public class ProducerThread extends Thread {
-    private final SynchronizedQueue<ParticipantEntry> queue;
+    private final SynchronizedQueue<Entry> queue;
 
-    public ProducerThread(SynchronizedQueue<ParticipantEntry> queue) {
+    public ProducerThread(SynchronizedQueue<Entry> queue) {
         this.queue = queue;
     }
 

@@ -2,62 +2,61 @@ package solution;
 
 import data_structures.SynchronizedList;
 import data_structures.SynchronizedQueue;
-import domain.ParticipantEntry;
+import domain.Entry;
 import parallelism.ConsumerThread;
 import parallelism.ProducerThread;
 
 import java.io.*;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 public class Solution {
     private static int p;
     private static int producersNum;
     private static int consumersNum;
     private static int maxQueueSize;
-    private static List<ParticipantEntry> results;
+    private static List<Entry> results;
 
-    public static void writeResultsToFile(List<ParticipantEntry> resultsList, String filePath) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
-
-        resultsList.forEach(entry -> {
-            try {
-                writer.write(String.valueOf(entry.getId()));
-                writer.write(' ');
-                writer.write(String.valueOf(entry.getScore()));
-                writer.write(' ');
-                writer.write(String.valueOf(entry.getCountryNum()));
-                writer.newLine();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-
-        writer.close();
-    }
-
-    private static void compareResultsWithSequential() throws FileNotFoundException {
-        var filePath = "output\\Clasament_seq.txt";
-        Scanner scanner = new Scanner(new FileReader(filePath));
-
-        for (var entry : results) {
-            int id = scanner.nextInt();
-            int score = scanner.nextInt();
-
-            if (entry.getId() != id || entry.getScore() != score) {
-                System.err.println("Results do not match.");
-                return;
-            }
-        }
-    }
+//    public static void writeResultsToFile(List<ParticipantEntry> resultsList, String filePath) throws IOException {
+//        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+//
+//        resultsList.forEach(entry -> {
+//            try {
+//                writer.write(String.valueOf(entry.getId()));
+//                writer.write(' ');
+//                writer.write(String.valueOf(entry.getScore()));
+//                writer.write(' ');
+//                writer.write(String.valueOf(entry.getCountryNum()));
+//                writer.newLine();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+//
+//        writer.close();
+//    }
+//
+//    private static void compareResultsWithSequential() throws FileNotFoundException {
+//        var filePath = "output\\Clasament_seq.txt";
+//        Scanner scanner = new Scanner(new FileReader(filePath));
+//
+//        for (var entry : results) {
+//            int id = scanner.nextInt();
+//            int score = scanner.nextInt();
+//
+//            if (entry.getId() != id || entry.getScore() != score) {
+//                System.err.println("Results do not match.");
+//                return;
+//            }
+//        }
+//    }
 
     private static void runParallel() throws InterruptedException, IOException {
         Thread[] producers = new Thread[producersNum];
         Thread[] consumers = new Thread[consumersNum];
 
-        SynchronizedList<ParticipantEntry> resultsList = new SynchronizedList<>();
-        SynchronizedQueue<ParticipantEntry> queue = new SynchronizedQueue<>(maxQueueSize);
+        SynchronizedList<Entry> resultsList = new SynchronizedList<>();
+        SynchronizedQueue<Entry> queue = new SynchronizedQueue<>(maxQueueSize);
 
         for (int i = 0; i < producersNum; i++) {
             producers[i] = new ProducerThread(queue);

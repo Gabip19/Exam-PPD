@@ -1,7 +1,7 @@
 package parallelism;
 
 import data_structures.SynchronizedQueue;
-import domain.ParticipantEntry;
+import domain.Entry;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -35,7 +35,7 @@ public class ReadTask implements Runnable {
             int id = scanner.nextInt();
             int score = scanner.nextInt();
 
-            queue.enqueue(new ParticipantEntry(id, score, countryNum));
+            queue.enqueue(new Entry(id, score, countryNum));
         }
     }
 }
