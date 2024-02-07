@@ -2,13 +2,13 @@ package parallelism;
 
 import data_structures.SynchronizedList;
 import data_structures.SynchronizedQueue;
-import domain.Entry;
+import domain.Cursant;
 
 public class ConsumerThread extends Thread {
-    private final SynchronizedQueue<Entry> queue;
-    private final SynchronizedList<Entry> resultList;
+    private final SynchronizedQueue<Cursant> queue;
+    private final SynchronizedList<Cursant> resultList;
 
-    public ConsumerThread(SynchronizedQueue<Entry> queue, SynchronizedList<Entry> resultList) {
+    public ConsumerThread(SynchronizedQueue<Cursant> queue, SynchronizedList<Cursant> resultList) {
         this.queue = queue;
         this.resultList = resultList;
     }

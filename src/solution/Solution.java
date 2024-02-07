@@ -1,22 +1,17 @@
 package solution;
 
 import data_structures.SynchronizedList;
-import data_structures.SynchronizedQueue;
-import domain.Entry;
-import parallelism.ConsumerThread;
-import parallelism.ProducerThread;
+import domain.Cursant;
+import parallelism.Manager;
+import parallelism.Secretara;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Random;
 
 public class Solution {
     private static int p;
-    private static int producersNum;
-    private static int consumersNum;
-    private static int maxQueueSize;
-    private static List<Entry> results;
-
 //    public static void writeResultsToFile(List<ParticipantEntry> resultsList, String filePath) throws IOException {
 //        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
 //
@@ -51,29 +46,53 @@ public class Solution {
 //        }
 //    }
 
+    private static ArrayList<Cursant> generateList(int n) {
+        var list = new ArrayList<Cursant>();
+
+        for (int i = 0; i < n; i++) {
+            Random random = new Random();
+            var id = 1 + random.nextInt(n);
+            var medie = random.nextFloat(1,10.1f);
+
+            list.add(new Cursant(id, medie));
+        }
+
+        return list;
+    }
+
     private static void runParallel() throws InterruptedException, IOException {
-        Thread[] producers = new Thread[producersNum];
-        Thread[] consumers = new Thread[consumersNum];
+        Thread[] secretare = new Thread[p];
+        int n = 103;
 
-        SynchronizedList<Entry> resultsList = new SynchronizedList<>();
-        SynchronizedQueue<Entry> queue = new SynchronizedQueue<>(maxQueueSize);
+        ArrayList<Cursant> cursantsList = generateList(n);
 
-        for (int i = 0; i < producersNum; i++) {
-            producers[i] = new ProducerThread(queue);
+        SynchronizedList<Cursant> resultsList = new SynchronizedList<>();
+
+        Thread manager = new Manager(resultsList);
+        manager.start();
+
+        int batchSize = n / p;
+        int remainder = n % p;
+        int start = 0;
+
+        for (int i = 0; i < p; i++) {
+            int end = start + batchSize;
+            if (remainder != 0) {
+                end++;
+                remainder--;
+            }
+
+            secretare[i] = new Secretara(resultsList, cursantsList, start, end);
+            secretare[i].start();
+
+            start = end;
         }
 
-        for (int i = 0; i < consumersNum; i++) {
-            consumers[i] = new ConsumerThread(queue, resultsList);
+        for (int i = 0; i < p; i++) {
+            secretare[i].join();
         }
 
-        for (int i = 0; i < producersNum; i++) {
-            producers[i].join();
-        }
-
-        for (int i = 0; i < consumersNum; i++) {
-            consumers[i].join();
-        }
-
+        manager.join();
 //        if (success) {
 //            results = resultsList.getEntriesAsList();
 //            results.sort((t1, t2) -> {
@@ -110,18 +129,18 @@ public class Solution {
 //    }
 
     public static void Solve(String[] args) throws IOException, InterruptedException {
-        int maxQueueSize, producersNum, consumersNum;
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Max queue size: ");
-        maxQueueSize = scanner.nextInt();
-
-        System.out.println("Producers number: ");
-        producersNum = scanner.nextInt();
-
-        System.out.println("Consumers number: ");
-        consumersNum = scanner.nextInt();
-
+//        int maxQueueSize, producersNum, consumersNum;
+//        Scanner scanner = new Scanner(System.in);
+//
+//        System.out.println("Max queue size: ");
+//        maxQueueSize = scanner.nextInt();
+//
+//        System.out.println("Producers number: ");
+//        producersNum = scanner.nextInt();
+//
+//        System.out.println("Consumers number: ");
+//        consumersNum = scanner.nextInt();
+//
 //        p = Integer.parseInt(args[1]);
 //        queueSize = Integer.parseInt(args[0]);
 //        producerThreadsNum = Integer.parseInt(args[2]);
@@ -129,10 +148,10 @@ public class Solution {
 //        problemsNumber = Integer.parseInt(args[4]);
 //        int checkResult = Integer.parseInt(args[5]);
 
-        Solution.maxQueueSize = maxQueueSize;
-        Solution.producersNum = producersNum;
-        Solution.consumersNum = consumersNum;
-        Solution.p = producersNum + consumersNum;
+//        Solution.maxQueueSize = maxQueueSize;
+//        Solution.producersNum = producersNum;
+//        Solution.consumersNum = consumersNum;
+        Solution.p = 5;
 
         long start = System.nanoTime();
 
