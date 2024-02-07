@@ -44,6 +44,9 @@ public class SynchronizedList<TEntry> {
 
     public List<TEntry> getEntriesAsList() {
         var entriesList = new ArrayList<TEntry>();
+
+        listLock.lock();
+
         var tail = linkedList.getTail();
         var currentNode = linkedList.getFirstNode();
 
@@ -51,6 +54,8 @@ public class SynchronizedList<TEntry> {
             entriesList.add(currentNode.getEntry());
             currentNode = currentNode.getNext();
         }
+
+        listLock.unlock();
 
         return entriesList;
     }

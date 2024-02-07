@@ -133,6 +133,8 @@ public class MyLinkedList<TEntry> {
 
         tail.previous = newNode;
         newNode.next = tail;
+
+        size++;
     }
 
     public void insertFirst(TEntry entry) {
@@ -144,5 +146,7 @@ public class MyLinkedList<TEntry> {
 
         next.previous = newNode;
         newNode.next = next;
+
+        size++;
     }
 }
