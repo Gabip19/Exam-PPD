@@ -16,6 +16,7 @@ public class Solution {
     private static int producersNum;
     private static int consumersNum;
     private static int maxQueueSize;
+    private static List<ParticipantEntry> results;
 
     public static void writeResultsToFile(List<ParticipantEntry> resultsList, String filePath) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
