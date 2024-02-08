@@ -1,14 +1,14 @@
 package solution;
 
-import data_structures.SynchronizedList;
+import data_structures.SynchronizedMap;
 import data_structures.SynchronizedQueue;
 import domain.Entry;
 import parallelism.ConsumerThread;
 import parallelism.ProducerThread;
+import parallelism.SupervisorThread;
 
 import java.io.*;
 import java.util.List;
-import java.util.Scanner;
 
 public class Solution {
     private static int p;
@@ -16,6 +16,10 @@ public class Solution {
     private static int consumersNum;
     private static int maxQueueSize;
     private static List<Entry> results;
+    private static int Ta;
+    private static int Tr;
+    private static int Tv;
+    private static int c;
 
 //    public static void writeResultsToFile(List<ParticipantEntry> resultsList, String filePath) throws IOException {
 //        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
@@ -52,27 +56,47 @@ public class Solution {
 //    }
 
     private static void runParallel() throws InterruptedException, IOException {
-        Thread[] producers = new Thread[producersNum];
-        Thread[] consumers = new Thread[consumersNum];
+        Thread[] producers = new Thread[p];
+        Thread[] consumers = new Thread[c];
 
-        SynchronizedList<Entry> resultsList = new SynchronizedList<>();
-        SynchronizedQueue<Entry> queue = new SynchronizedQueue<>(maxQueueSize);
+        SynchronizedQueue<Entry> queueDiff_1 = new SynchronizedQueue<>(maxQueueSize);
+        SynchronizedQueue<Entry> queueDiff_2 = new SynchronizedQueue<>(maxQueueSize);
+        SynchronizedQueue<Entry> queueDiff_3 = new SynchronizedQueue<>(maxQueueSize);
 
-        for (int i = 0; i < producersNum; i++) {
-            producers[i] = new ProducerThread(queue);
+        SynchronizedMap resultsMap = new SynchronizedMap();
+
+        for (int i = 0; i < p; i++) {
+            producers[i] = new ProducerThread(i, Ta, queueDiff_1, queueDiff_2, queueDiff_3);
+            producers[i].start();
         }
 
-        for (int i = 0; i < consumersNum; i++) {
-            consumers[i] = new ConsumerThread(queue, resultsList);
+//        Thread superVisor = new SupervisorThread(Tv, queueDiff_1, queueDiff_2, queueDiff_3, resultsMap);
+//        superVisor.start();
+
+        for (int i = 0; i < 2; i++) {
+            consumers[i] = new ConsumerThread(queueDiff_1, resultsMap, Tr);
+            consumers[i].start();
         }
 
-        for (int i = 0; i < producersNum; i++) {
+        for (int i = 2; i < 4; i++) {
+            consumers[i] = new ConsumerThread(queueDiff_2, resultsMap, Tr);
+            consumers[i].start();
+        }
+
+        for (int i = 4; i < c; i++) {
+            consumers[i] = new ConsumerThread(queueDiff_3, resultsMap, Tr);
+            consumers[i].start();
+        }
+
+        for (int i = 0; i < p; i++) {
             producers[i].join();
         }
 
-        for (int i = 0; i < consumersNum; i++) {
+        for (int i = 0; i < c; i++) {
             consumers[i].join();
         }
+
+//        superVisor.join();
 
 //        if (success) {
 //            results = resultsList.getEntriesAsList();
@@ -110,17 +134,17 @@ public class Solution {
 //    }
 
     public static void Solve(String[] args) throws IOException, InterruptedException {
-        int maxQueueSize, producersNum, consumersNum;
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("Max queue size: ");
-        maxQueueSize = scanner.nextInt();
-
-        System.out.println("Producers number: ");
-        producersNum = scanner.nextInt();
-
-        System.out.println("Consumers number: ");
-        consumersNum = scanner.nextInt();
+//        int maxQueueSize, producersNum, consumersNum;
+//        Scanner scanner = new Scanner(System.in);
+//
+//        System.out.println("Max queue size: ");
+//        maxQueueSize = scanner.nextInt();
+//
+//        System.out.println("Producers number: ");
+//        producersNum = scanner.nextInt();
+//
+//        System.out.println("Consumers number: ");
+//        consumersNum = scanner.nextInt();
 
 //        p = Integer.parseInt(args[1]);
 //        queueSize = Integer.parseInt(args[0]);
@@ -128,11 +152,12 @@ public class Solution {
 //        countriesNumber = Integer.parseInt(args[3]);
 //        problemsNumber = Integer.parseInt(args[4]);
 //        int checkResult = Integer.parseInt(args[5]);
-
-        Solution.maxQueueSize = maxQueueSize;
-        Solution.producersNum = producersNum;
-        Solution.consumersNum = consumersNum;
-        Solution.p = producersNum + consumersNum;
+        Solution.maxQueueSize = 20;
+        Solution.p = 5;
+        Solution.Ta = 20;
+        Solution.Tr = 100;
+        Solution.Tv = 30;
+        Solution.c = 6;
 
         long start = System.nanoTime();
 
@@ -140,7 +165,6 @@ public class Solution {
 
         long end = System.nanoTime();
         System.out.println((double) (end - start) / 1E6);
-
 //        if (checkResult == 1) {
 //            compareResultsWithSequential();
 //        }

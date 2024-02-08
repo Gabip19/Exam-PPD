@@ -35,6 +35,7 @@ public class SynchronizedQueue<TEntry> {
 
             queue.offer(element);
             size++;
+//            System.out.println("size: " + size);
             notEmpty.signalAll();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -93,6 +94,18 @@ public class SynchronizedQueue<TEntry> {
             }
         }
         lock.unlock();
+    }
+
+    public int getSize() {
+        lock.lock();
+        var value = 0;
+        if (activeConsumers == 0 && activeProducers == 0) {
+            value = -1;
+        } else {
+            value = size;
+        }
+        lock.unlock();
+        return value;
     }
 
     public void awaitTermination() throws InterruptedException {
