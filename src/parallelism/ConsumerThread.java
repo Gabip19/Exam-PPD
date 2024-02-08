@@ -30,7 +30,7 @@ public class ConsumerThread extends Thread {
         while (true) {
             try {
                 var entry = queue.dequeue();
-//                System.out.println("Am scos: " + entry);
+                System.out.println("Am scos: " + entry);
                 waitTime(Tr);
 
                 if (entry == null) {

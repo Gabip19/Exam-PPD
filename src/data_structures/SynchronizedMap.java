@@ -30,7 +30,15 @@ public class SynchronizedMap {
         }
     }
 
-//    public synchronized void
+    public synchronized HashMap<Integer, Integer> getValues() {
+        HashMap<Integer, Integer> values = new HashMap<>();
+
+        for (var value : map.entrySet()) {
+            values.put(value.getKey(), value.getValue().size());
+        }
+
+        return values;
+    }
 
 //    public void add(TEntry entry) {
 //        listLock.lock();

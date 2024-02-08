@@ -70,8 +70,8 @@ public class Solution {
             producers[i].start();
         }
 
-//        Thread superVisor = new SupervisorThread(Tv, queueDiff_1, queueDiff_2, queueDiff_3, resultsMap);
-//        superVisor.start();
+        Thread superVisor = new SupervisorThread(Tv, queueDiff_1, queueDiff_2, queueDiff_3, resultsMap);
+        superVisor.start();
 
         for (int i = 0; i < 2; i++) {
             consumers[i] = new ConsumerThread(queueDiff_1, resultsMap, Tr);
@@ -96,7 +96,7 @@ public class Solution {
             consumers[i].join();
         }
 
-//        superVisor.join();
+        superVisor.join();
 
 //        if (success) {
 //            results = resultsList.getEntriesAsList();
@@ -154,9 +154,9 @@ public class Solution {
 //        int checkResult = Integer.parseInt(args[5]);
         Solution.maxQueueSize = 20;
         Solution.p = 5;
-        Solution.Ta = 20;
+        Solution.Ta = 10;
         Solution.Tr = 100;
-        Solution.Tv = 30;
+        Solution.Tv = 5;
         Solution.c = 6;
 
         long start = System.nanoTime();
